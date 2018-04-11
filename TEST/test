@@ -1,0 +1,93 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Mar 24 13:52:56 2018
+
+@author: Baixin
+"""
+
+
+# __*__ coding:utf-8
+class HuaweiContest:
+    def __init__(self, inputFile):
+        self.physicsStatus = None
+        self.flavorNumber = None
+        self.flavors = None
+        self.resourceName = None
+        self.startTime = None
+        self.endTime = None
+        self.inputFile = inputFile
+        self.realData = None
+        self.everageCost = None
+        self.dataInput()
+
+    def dataInput(self, ):
+        inputFile = open(self.inputFile, "r")
+        data = inputFile.readlines()
+        fileIndex = 0
+        # 物理服务器CPU核数 内存大小（GB） 硬盘大小（GB）
+        self.physicsStatus = data[fileIndex].strip("\n").split(" ")
+        # print self.physicsStatus
+        fileIndex += 2
+        # 虚拟机规格数量
+        self.flavorNumber = int(data[fileIndex].strip("\n"))
+        # print self.flavorNumber
+        fileIndex += 1
+        # 虚拟机规格信息若干行
+        self.flaovers = {}
+        for each in data[fileIndex:fileIndex + self.flavorNumber]:
+            tmp = each.strip("\n").split(" ")
+            self.flaovers[tmp[0]] = tmp[1:]
+        # print self.flaovers
+        fileIndex += self.flavorNumber + 1
+        # 需要优化的资源名称，CPU或者MEM
+        self.resourceName = data[fileIndex].strip("\n")
+        # print self.resourceName
+        fileIndex += 2
+        # 预测的开始时间
+        self.startTime = data[fileIndex].strip("\n")
+        # print self.startTime
+        fileIndex += 1
+        # 预测的开始时间
+        self.endTime = data[fileIndex].strip("\n")
+        # print self.endTime
+
+    def loadTrainData(self, loadFile):
+        data = []
+        for each in open(loadFile, "r").readlines():
+            tmp = each.strip("\n").split("\t")
+            temp = tmp[2].split(" ")
+            print(tmp[1], str(temp[0]).replace("-", ""), str(temp[1]).replace(":", ""))
+
+            data.append([int(tmp[2][8:10]), tmp[1]])
+        dateSet = set([int(i[0]) for i in data])
+        # print dateSet
+        self.realData = {}
+
+        list(dateSet).sort()
+        print(dateSet)
+
+        for each in dateSet:
+            self.realData[each] = []
+            for i in data:
+                if i[0] == each and i[1] in self.flaovers.keys():
+                    self.realData[each].append(i[1])
+        for each in self.realData.keys():
+            print(each, self.realData[each])
+
+    """def computeEverageCost(self):
+        everageCost = {}
+        for i in self.realData.keys():
+            totalCPUCost = 0
+            totalMEMCost = 0
+            for each in self.realData[i]:
+                totalCPUCost += int(self.flaovers[each][0])
+                totalMEMCost += int(self.flaovers[each][1])
+            everageCost[int(i)] = [totalCPUCost * 1.0 / len(self.realData[i]),totalMEMCost * 1.0 / len(self.realData[i])]
+        for each in everageCost.keys():
+            print(each,everageCost[each])"""
+
+
+if __name__ == "__main__":
+    contest = HuaweiContest("in.txt")
+    contest.loadTrainData("train.txt")
+    # contest.computeEverageCost()
